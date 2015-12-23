@@ -2,6 +2,9 @@
 
 /**
  * This file is part of \Dana\Bitap.
+ *
+ * @copyright © dana <https://github.com/okdana>
+ * @license   MIT
  */
 
 namespace Dana\Test\Bitap;
