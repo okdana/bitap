@@ -144,5 +144,20 @@ class BitapTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame([4, 7],       $res5->indexes);
 		//$this->assertSame([4, 7],       $res6->indexes);
 	}
+
+	/**
+	 * Tests bitapMatch() method with needle longer than hay stack.
+	 *
+	 * @return void
+	 */
+	public function testBitapMatchWithNeedleLongerThanHaystack() {
+		$res1 = \Dana\Bitap\Bitap::bitapMatch('abcd', 'abc', 0.00);
+		$res2 = \Dana\Bitap\Bitap::bitapMatch('abcd', 'abc', 0.25);
+		$res3 = \Dana\Bitap\Bitap::bitapMatch('abcd', 'abc', 1.00);
+
+		$this->assertSame([],  $res1->indexes);
+		$this->assertSame([0], $res2->indexes);
+		$this->assertSame([0], $res3->indexes);
+	}
 }
 
