@@ -22,54 +22,56 @@ class Bitap {
 	 * @param string $haystack
 	 *   The string to search within.
 	 *
-	 * @param float|int $threshold
-	 *   (optional) The ratio of erroneous $needle characters to be accepted for
-	 *   fuzzy matching. The default is 0.25 (25% of the length of $needle). If
-	 *   0, exact matching will be used.
+	 * @param int|null $threshold
+	 *   (optional) The maximum number of errors to be accepted for fuzzy
+	 *   matching. The default is the floor of 25% of the length of $needle. If
+	 *   0, an exact match will be performed.
 	 *
-	 * @return \Dana\Bitap\BitapResult
-	 *   An object representing the result of the match.
+	 * @return bool
+	 *   True if a match was found, false if not.
 	 */
-	public static function bitapMatch($needle, $haystack, $threshold = 0.25) {
+	public static function bitapMatch($needle, $haystack, $threshold = null) {
 		$needleLen    = strlen($needle);
 		$haystackLen  = strlen($haystack);
 		$patternMask  = [];
 		$row          = [];
-		$firstMatched = -1;
-		$indexes      = [];
+		$threshold    = $threshold === null ? floor($needleLen * 0.25) : (int) abs($threshold);
 
+		// Empty needle or exact match
 		if ( $needle === '' || $needle === $haystack ) {
-			return new \Dana\Bitap\BitapResult($needle, $haystack, [0]);
+			return true;
 		}
 
+		// Empty hay stack
 		if ( $haystack === '' ) {
-			return new \Dana\Bitap\BitapResult($needle, $haystack);
+			return false;
 		}
 
-		if ( $threshold < 0.000 || $threshold > 1.000 ) {
-			throw new \InvalidArgumentException('Threshold must be between 0 and 1');
-		}
-
-		$threshold = floor($needleLen * $threshold);
-
+		// Initialise table
 		for ( $i = 0; $i <= $threshold + 1; $i++ ) {
 			$row[$i] = 1;
 		}
 
+		// Initialise pattern mask (255 gives us the full extended ASCII range)
 		for ( $i = 0; $i < 256; $i++ ) {
 			$patternMask[$i] = 0;
 		}
 
+		// Initialise needle bit masks. e.g., the mask for 'o' in 'foo' is 110:
+		// 1. foo -> original text
+		// 2. 011 -> 1 where letter appears, 0 where it doesn't
+		// 3. 110 -> swap bit order
 		for ( $i = 0; $i < $needleLen; ++$i ) {
 			$patternMask[ord($needle[$i])] |= 1 << $i;
+			printf("%s: %b\n", $needle[$i], $patternMask[ord($needle[$i])]);
 		}
 
+		// Loop through hay-stack chars
 		for ( $i = 0; $i < $haystackLen; $i++ ) {
 			$oldCol     = 0;
 			$nextOldCol = 0;
 
-			echo "${i}", "\n";
-
+			// Test for each level of errors
 			for ( $d = 0; $d <= $threshold; ++$d ) {
 				$replace = ($oldCol | ($row[$d] & $patternMask[ord($haystack[$i])])) << 1;
 				$insert  = $oldCol | (($row[$d] & $patternMask[ord($haystack[$i])]) << 1);
@@ -80,23 +82,13 @@ class Bitap {
 				$nextOldCol = $row[$d];
 			}
 
+			// If we've got a match, we're done
 			if ( 0 < ($row[$threshold] & (1 << $needleLen)) ) {
-				if ( $firstMatched === -1 || $i - $firstMatched > $needleLen ) {
-
-					$startPos = max(0, $i - $needleLen + 1);
-					$endPos   = min($i + 1, $haystackLen);
-
-					echo "${startPos}:${endPos}: ";
-					echo substr($haystack, $startPos, $startPos === 0 ? $endPos : $haystackLen - $endPos);
-					echo "\n";
-
-					$firstMatched = $i;
-					$indexes[]    = $firstMatched - $needleLen + 1;
-				}
+				return true;
 			}
 		}
 
-		return new \Dana\Bitap\BitapResult($needle, $haystack, $indexes);
+		return false;
 	}
 
 	/**
@@ -111,19 +103,18 @@ class Bitap {
 	 * @param array $haystack
 	 *   An array of strings to search within.
 	 *
-	 * @param float|int $threshold
-	 *   (optional) The ratio of erroneous $needle characters to be accepted for
-	 *   fuzzy matching.
+	 * @param int|null $threshold
+	 *   (optional) The number of errors to be accepted for fuzzy matching.
 	 *
 	 * @return array
 	 *   Zero or more elements from $haystack. The original keys of any matching
 	 *   elements will be preserved.
 	 */
-	public static function bitapGrep($needle, array $haystack, $threshold = 0.25) {
+	public static function bitapGrep($needle, array $haystack, $threshold = null) {
 		$results = [];
 
 		foreach ( $haystack as $k => $v ) {
-			if ( static::bitapMatch($needle, $v, $threshold)->match ) {
+			if ( static::bitapMatch($needle, $v, $threshold) ) {
 				$results[$k] = $v;
 			}
 		}
