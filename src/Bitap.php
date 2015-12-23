@@ -66,7 +66,6 @@ class Bitap {
 		// 3. 110 -> swap bit order
 		for ( $i = 0; $i < $needleLen; ++$i ) {
 			$patternMask[ord($needle[$i])] |= 1 << $i;
-			printf("%s: %b\n", $needle[$i], $patternMask[ord($needle[$i])]);
 		}
 
 		// Loop through hay-stack chars
