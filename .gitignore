@@ -1,4 +1,21 @@
+# PHARs and generated folders
+/composer
+/*.phar
+/coverage/
+/vendor/
+
+# Leave phpunit.xml for the end user
 phpunit.xml
-coverage/
-vendor/
+
+# OS X-generated files
+._*
+.DS_Store*
+.Spotlight-V100
+.Trashes
+Icon\?
+
+# Editor-generated files
+*~
+.*.s[a-w][a-z]
+*.sublime-workspace
 
