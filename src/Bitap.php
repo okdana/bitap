@@ -10,7 +10,7 @@
 namespace Dana\Bitap;
 
 /**
- * Provides static methods for fuzzy string matching using the Bitap algorithm.
+ * Provides methods for fuzzy string matching using the Bitap algorithm.
  */
 class Bitap {
 	/**
@@ -33,7 +33,11 @@ class Bitap {
 	 * @return bool
 	 *   True if a match was found, false if not.
 	 */
-	public static function bitapMatch($needle, $haystack, $threshold = null) {
+	public function match(
+		string $needle,
+		string $haystack,
+		int    $threshold = null
+	): bool {
 		$needleLen    = strlen($needle);
 		$haystackLen  = strlen($haystack);
 		$patternMask  = [];
@@ -96,7 +100,7 @@ class Bitap {
 	/**
 	 * Returns any array elements matching the supplied needle.
 	 *
-	 * @see \Dana\Bitap\Bitap::bitapMatch()
+	 * @see \Dana\Bitap\Bitap::match()
 	 * @see \preg_grep()
 	 *
 	 * @param string $needle
@@ -108,15 +112,19 @@ class Bitap {
 	 * @param int|null $threshold
 	 *   (optional) The number of errors to be accepted for fuzzy matching.
 	 *
-	 * @return array
+	 * @return string[]
 	 *   Zero or more elements from $haystack. The original keys of any matching
 	 *   elements will be preserved.
 	 */
-	public static function bitapGrep($needle, array $haystack, $threshold = null) {
+	public function grep(
+		string $needle,
+		array  $haystack,
+		int    $threshold = null
+	): array {
 		$results = [];
 
 		foreach ( $haystack as $k => $v ) {
-			if ( static::bitapMatch($needle, $v, $threshold) ) {
+			if ( $this->match($needle, (string) $v, $threshold) ) {
 				$results[$k] = $v;
 			}
 		}
