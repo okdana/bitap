@@ -2,11 +2,8 @@
 
 .SILENT:
 
-PHPUNIT_OPTS  := --color $(PHPUNIT_ARGS)
-COMPOSER_OPTS := -n $(COMPOSER_ARGS)
-
-default:    vendor
-build:      vendor
+default:    vendor/bin/phpunit
+build:      vendor/bin/phpunit
 build_dev:  vendor/bin/phpunit
 vendor_dev: vendor/bin/phpunit
 
@@ -18,23 +15,23 @@ composer:
 
 # Install non-dev dependencies
 vendor: composer
-	./composer $(COMPOSER_OPTS) --no-dev install
+	./composer -n --no-dev install
 	touch vendor
 
 # Install dev dependencies
 vendor/bin/phpunit: composer
-	./composer $(COMPOSER_OPTS) install
+	./composer -n install
 	touch vendor vendor/bin vendor/bin/phpunit
 
 # Clean generated folders and phars
 distclean: clean
 clean:
-	rm -rf ./coverage ./vendor
+	rm -rf ./coverage ./vendor ./.phpintel/
 	rm -f  ./composer ./*.phar
 
 # Perform PHPUnit tests
 test: vendor/bin/phpunit
-	./vendor/bin/phpunit $(PHPUNIT_OPTS)
+	./vendor/bin/phpunit --color
 
 PHONY := default
 PHONY += build build_dev vendor_dev
