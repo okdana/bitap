@@ -18,4 +18,5 @@ Icon\?
 *~
 .*.s[a-w][a-z]
 *.sublime-workspace
+.phpintel/
 
