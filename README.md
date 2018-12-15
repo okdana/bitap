@@ -4,6 +4,12 @@
 [Bitap](https://en.wikipedia.org/wiki/Bitap_algorithm) fuzzy string-matching
 algorithm.
 
+## Warning
+
+This project hasn't been updated in a long time, and i don't think it's very
+good anyway. I haven't tried it myself, but you might consider using
+[Loilo/Fuse](https://github.com/Loilo/Fuse) instead.
+
 ## Usage
 
 Two methods are provided: `match()`, which tests an individual needle string
